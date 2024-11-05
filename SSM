@@ -1,32 +1,375 @@
-from ebook import EBook
-from customer import Customer
-from shopping_cart import ShoppingCart
-from order import Order
-from invoice import Invoice
+class EBook:
+    """
+    Represents an e-book in the store.
+    """
 
-def test_all_features():
-    # Create some e-books
-    book1 = EBook("Python Basics", "Author A", "2023-01-01", "Programming", 15.0)
-    book2 = EBook("Advanced Python", "Author B", "2023-02-01", "Programming", 25.0)
-    
-    # Create a customer
-    customer = Customer("John Doe", "john@example.com", loyalty_member=True)
-    
-    # Create a shopping cart and add items
+    def __init__(self, title, author, publication_date, genre, price):
+        self._title = title
+        self._author = author
+        self._publication_date = publication_date
+        self._genre = genre
+        self._price = price
+
+    # Getters and Setters
+    def get_title(self):
+        return self._title
+
+    def set_title(self, title):
+        self._title = title
+
+    def get_author(self):
+        return self._author
+
+    def set_author(self, author):
+        self._author = author
+
+    def get_publication_date(self):
+        return self._publication_date
+
+    def set_publication_date(self, publication_date):
+        self._publication_date = publication_date
+
+    def get_genre(self):
+        return self._genre
+
+    def set_genre(self, genre):
+        self._genre = genre
+
+    def get_price(self):
+        return self._price
+
+    def set_price(self, price):
+        self._price = price
+
+    def __str__(self):
+        return f"EBook(title={self._title}, author={self._author}, price={self._price})"
+class Customer:
+    """
+    Class representing a customer in the e-book store.
+    """
+
+    def __init__(self, name, contact_info, loyalty_member=False, account_creation_date=None):
+        self._name = name
+        self._contact_info = contact_info
+        self._loyalty_member = loyalty_member
+        self._account_creation_date = account_creation_date
+
+    # Getters and Setters
+    def get_name(self):
+        return self._name
+
+    def set_name(self, name):
+        self._name = name
+
+    def get_contact_info(self):
+        return self._contact_info
+
+    def set_contact_info(self, contact_info):
+        self._contact_info = contact_info
+
+    def is_loyalty_member(self):
+        return self._loyalty_member
+
+    def set_loyalty_member(self, loyalty_member):
+        self._loyalty_member = loyalty_member
+
+    def get_account_creation_date(self):
+        return self._account_creation_date
+
+    def set_account_creation_date(self, account_creation_date):
+        self._account_creation_date = account_creation_date
+
+    def __str__(self):
+        status = "Loyalty Member" if self._loyalty_member else "Regular Customer"
+        return f"Customer(name={self._name}, status={status})"
+class ShoppingCart:
+    """
+    Represents a shopping cart holding multiple e-books.
+    """
+
+    def __init__(self):
+        self._items = {}  # Dictionary of EBook objects and quantities
+        self._total_price = 0.0
+        self._cart_creation_date = None
+        self._last_updated = None
+
+    # Getters and Setters
+    def get_items(self):
+        return self._items
+
+    def set_items(self, items):
+        self._items = items
+
+    def get_total_price(self):
+        return self._total_price
+
+    def set_total_price(self, total_price):
+        self._total_price = total_price
+
+    def get_cart_creation_date(self):
+        return self._cart_creation_date
+
+    def set_cart_creation_date(self, cart_creation_date):
+        self._cart_creation_date = cart_creation_date
+
+    def get_last_updated(self):
+        return self._last_updated
+
+    def set_last_updated(self, last_updated):
+        self._last_updated = last_updated
+
+    # Cart operations
+    def add_to_cart(self, ebook, quantity=1):
+        if ebook in self._items:
+            self._items[ebook] += quantity
+        else:
+            self._items[ebook] = quantity
+
+    def remove_from_cart(self, ebook):
+        if ebook in self._items:
+            del self._items[ebook]
+
+    def update_quantity(self, ebook, quantity):
+        if ebook in self._items:
+            self._items[ebook] = quantity
+
+    def get_total(self):
+        self._total_price = sum(ebook.get_price() * quantity for ebook, quantity in self._items.items())
+        return self._total_price
+
+    def __str__(self):
+        return f"ShoppingCart(items={[(str(item), qty) for item, qty in self._items.items()]})"
+class Discount:
+    """
+    A utility class for applying discounts and calculating VAT.
+    """
+
+    def __init__(self, loyalty_discount_rate=0.1, bulk_discount_rate=0.2, vat_rate=0.08):
+        self._loyalty_discount_rate = loyalty_discount_rate
+        self._bulk_discount_rate = bulk_discount_rate
+        self._vat_rate = vat_rate
+        self._discounts_applied = []
+
+    # Getters and Setters
+    def get_loyalty_discount_rate(self):
+        return self._loyalty_discount_rate
+
+    def set_loyalty_discount_rate(self, rate):
+        self._loyalty_discount_rate = rate
+
+    def get_bulk_discount_rate(self):
+        return self._bulk_discount_rate
+
+    def set_bulk_discount_rate(self, rate):
+        self._bulk_discount_rate = rate
+
+    def get_vat_rate(self):
+        return self._vat_rate
+
+    def set_vat_rate(self, rate):
+        self._vat_rate = rate
+
+    def get_discounts_applied(self):
+        return self._discounts_applied
+
+    def set_discounts_applied(self, discounts):
+        self._discounts_applied = discounts
+
+    # Discount and VAT calculation methods
+    def apply_loyalty_discount(self, amount):
+        discount = amount * self._loyalty_discount_rate
+        self._discounts_applied.append(discount)
+        return discount
+
+    def apply_bulk_discount(self, amount):
+        discount = amount * self._bulk_discount_rate
+        self._discounts_applied.append(discount)
+        return discount
+
+    def calculate_vat(self, amount):
+        return amount * self._vat_rate
+
+    def get_discount_details(self):
+        return self._discounts_applied
+class Order:
+    """
+    Represents an order containing customer details, shopping cart, and applicable discounts.
+    """
+
+    VAT_RATE = 0.08
+
+    def __init__(self, customer, shopping_cart, order_date, discount=None):
+        self._customer = customer
+        self._shopping_cart = shopping_cart
+        self._order_date = order_date
+        self._discounts = 0.0
+        self._total = shopping_cart.get_total()
+        self._discount = discount if discount else Discount()  # Optional discount object
+
+    # Getters and Setters
+    def get_customer(self):
+        return self._customer
+
+    def set_customer(self, customer):
+        self._customer = customer
+
+    def get_shopping_cart(self):
+        return self._shopping_cart
+
+    def set_shopping_cart(self, shopping_cart):
+        self._shopping_cart = shopping_cart
+
+    def get_order_date(self):
+        return self._order_date
+
+    def set_order_date(self, order_date):
+        self._order_date = order_date
+
+    def get_discounts(self):
+        return self._discounts
+
+    def set_discounts(self, discounts):
+        self._discounts = discounts
+
+    # Order operations
+    def apply_discount(self):
+        # Apply loyalty discount if the customer is a loyalty member
+        if self._customer.is_loyalty_member():
+            self._discounts += self._discount.apply_loyalty_discount(self._total)
+        # Apply bulk discount if 5 or more items are in the cart
+        if len(self._shopping_cart.get_items()) >= 5:
+            self._discounts += self._discount.apply_bulk_discount(self._total)
+
+    def calculate_total(self):
+        # Calculate final total after applying discounts and VAT
+        discounted_total = self._total - self._discounts
+        return discounted_total * (1 + self.VAT_RATE)
+
+    def get_order_summary(self):
+        # Summary of the order details
+        return {
+            "customer": str(self._customer),
+            "cart": str(self._shopping_cart),
+            "order_date": self._order_date,
+            "discounts": self._discounts,
+            "total_with_vat": self.calculate_total(),
+        }
+
+    def __str__(self):
+        return f"Order(total={self.calculate_total()}, discounts={self._discounts})"
+class Invoice:
+    """
+    Represents an invoice generated based on an order.
+    """
+
+    def __init__(self, order):
+        self._order = order
+        self._invoice_date = None
+        self._itemized_details = []
+        self._total_with_tax = order.calculate_total()
+
+    # Getters and Setters
+    def get_order(self):
+        return self._order
+
+    def set_order(self, order):
+        self._order = order
+
+    def get_invoice_date(self):
+        return self._invoice_date
+
+    def set_invoice_date(self, invoice_date):
+        self._invoice_date = invoice_date
+
+    def get_itemized_details(self):
+        return self._itemized_details
+
+    def set_itemized_details(self, itemized_details):
+        self._itemized_details = itemized_details
+
+    def get_total_with_tax(self):
+        return self._total_with_tax
+
+    def set_total_with_tax(self, total_with_tax):
+        self._total_with_tax = total_with_tax
+
+    # Invoice generation
+    def generate_invoice(self):
+        # Compile the invoice details
+        invoice_details = (
+            f"Invoice for Order\n"
+            f"Items: {self._order.get_shopping_cart()}\n"
+            f"Subtotal: {self._order.get_shopping_cart().get_total()}\n"
+            f"Discounts: {self._order.get_discounts()}\n"
+            f"Total with VAT: {self._total_with_tax}"
+        )
+        return invoice_details
+
+    def calculate_vat(self):
+        # Calculate VAT based on the order's discounted total
+        return self._order.calculate_total() * Order.VAT_RATE
+
+    def get_invoice_details(self):
+        # Summary of the invoice details
+        return {
+            "order": str(self._order),
+            "invoice_date": self._invoice_date,
+            "itemized_details": self._itemized_details,
+            "total_with_tax": self._total_with_tax,
+        }
+
+    def __str__(self):
+        return self.generate_invoice()
+# Test Case
+def run_test_case():
+    # Step 1: Create Customer
+    customer = Customer(
+        name="Sulaiman",
+        contact_info="suliman@information.com / 0502222222",
+        loyalty_member=True,
+        account_creation_date="2024-01-15"
+    )
+    print(customer)
+
+    # Step 2: Create EBooks
+    book1 = EBook("Python Basics", "John Smith", "2023-01-10", "Programming", 20.0)
+    book2 = EBook("Advanced Python", "Jane Doe", "2023-02-20", "Programming", 25.0)
+    book3 = EBook("Data Science Essentials", "Dr. Data", "2023-03-15", "Data Science", 30.0)
+    book4 = EBook("Machine Learning Intro", "Alice AI", "2023-04-01", "AI", 35.0)
+    book5 = EBook("Deep Learning Techniques", "Bob Neural", "2023-05-05", "AI", 40.0)
+
+    # Step 3: Add EBooks to ShoppingCart with quantities to activate bulk discount
     cart = ShoppingCart()
-    cart.add_to_cart(book1, 3)
-    cart.add_to_cart(book2, 3)
-    
-    # Display cart contents
-    print("Cart Contents:", cart.display_cart())
-    
-    # Create an order and apply discounts
-    order = Order(customer, cart, "2024-11-04")
-    order.apply_discount()
-    
-    # Generate an invoice
+    cart.add_to_cart(book1, 1)  # 1 copy of Python Basics
+    cart.add_to_cart(book2, 1)  # 1 copy of Advanced Python
+    cart.add_to_cart(book3, 1)  # 1 copy of Data Science Essentials
+    cart.add_to_cart(book4, 1)  # 1 copy of Machine Learning Intro
+    cart.add_to_cart(book5, 1)  # 1 copy of Deep Learning Techniques
+
+    # Display the ShoppingCart contents
+    print("Cart Contents:", cart)
+
+    # Step 4: Create a Discount object with default rates
+    discount = Discount()  # Default: 10% loyalty, 20% bulk, 8% VAT
+
+    # Step 5: Create an Order using the Customer, ShoppingCart, and Discount
+    order = Order(
+        customer=customer,
+        shopping_cart=cart,
+        order_date="2024-11-06",
+        discount=discount
+    )
+    order.apply_discount()  # Apply discounts based on loyalty and bulk conditions
+
+    # Display the Order details
+    print(order)
+
+    # Step 6: Generate an Invoice for the Order
     invoice = Invoice(order)
+    invoice.set_invoice_date("2024-11-06")  # Set invoice date
+
+    # Print the full invoice details
     print(invoice.generate_invoice())
 
-if __name__ == "__main__":
-    test_all_features()
+# Run the test case
+run_test_case()
