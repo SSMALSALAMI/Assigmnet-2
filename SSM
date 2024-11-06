@@ -320,56 +320,131 @@ class Invoice:
 
     def __str__(self):
         return self.generate_invoice()
-# Test Case
-def run_test_case():
-    # Step 1: Create Customer
-    customer = Customer(
-        name="Sulaiman",
-        contact_info="suliman@information.com / 0502222222",
-        loyalty_member=True,
-        account_creation_date="2024-01-15"
-    )
-    print(customer)
 
-    # Step 2: Create EBooks
+
+# Test cases for Customer Class
+def test_customer_class():
+    print("\n--- Customer Class Test ---")
+    # Case 1: Customer with loyalty membership
+    customer1 = Customer("Sulaiman", "suliman@information.com / 0502222222", True, "2024-01-15")
+    print("Customer 1 Created:", customer1)
+    print("Is Customer 1 a Loyalty Member?", "Yes" if customer1.is_loyalty_member() else "No")
+
+    # Modify attributes
+    customer1.set_name("Suliman Saif")
+    print("Updated Customer 1 Name:", customer1.get_name())
+    customer1.set_loyalty_member(False)
+    print("Updated Loyalty Status for Customer 1:",
+          "Loyalty Member" if customer1.is_loyalty_member() else "Regular Customer")
+
+    # Case 2: Customer without loyalty membership
+    customer2 = Customer("Ahmed", "ahmed@sample.com / 0501111111", False, "2024-02-10")
+    print("Customer 2 Created:", customer2)
+    print("Is Customer 2 a Loyalty Member?", "Yes" if customer2.is_loyalty_member() else "No")
+
+
+# Test cases for EBook Class
+def test_ebook_class():
+    print("\n--- EBook Class Test ---")
+    # Create EBook objects
+    book1 = EBook("Python Basics", "John Smith", "2023-01-10", "Programming", 20.0)
+    print("Book 1 Created:", book1)
+
+    # Modify attributes
+    book1.set_price(25.0)
+    print("Updated Book 1 Price:", book1.get_price())
+
+    # Create another EBook object
+    book2 = EBook("Data Science Essentials", "Dr. Data", "2023-03-15", "Data Science", 30.0)
+    print("Book 2 Created:", book2)
+
+
+# Test cases for ShoppingCart Class
+def test_shopping_cart_class():
+    print("\n--- ShoppingCart Class Test ---")
+    # Create a ShoppingCart and add items
+    cart = ShoppingCart()
     book1 = EBook("Python Basics", "John Smith", "2023-01-10", "Programming", 20.0)
     book2 = EBook("Advanced Python", "Jane Doe", "2023-02-20", "Programming", 25.0)
-    book3 = EBook("Data Science Essentials", "Dr. Data", "2023-03-15", "Data Science", 30.0)
-    book4 = EBook("Machine Learning Intro", "Alice AI", "2023-04-01", "AI", 35.0)
-    book5 = EBook("Deep Learning Techniques", "Bob Neural", "2023-05-05", "AI", 40.0)
 
-    # Step 3: Add EBooks to ShoppingCart with quantities to activate bulk discount
+    cart.add_to_cart(book1, 1)
+    cart.add_to_cart(book2, 2)
+    print("Cart Contents After Adding Books:", cart)
+
+    # Update quantity
+    cart.update_quantity(book2, 1)
+    print("Cart Contents After Updating Quantity for Book 2:", cart)
+
+    # Remove an item
+    cart.remove_from_cart(book1)
+    print("Cart Contents After Removing Book 1:", cart)
+
+
+# Test cases for Discount Class
+def test_discount_class():
+    print("\n--- Discount Class Test ---")
+    discount = Discount()
+
+    # Apply loyalty discount
+    original_amount = 100.0
+    loyalty_discount = discount.apply_loyalty_discount(original_amount)
+    print("Loyalty Discount on 100:", loyalty_discount)
+
+    # Apply bulk discount
+    bulk_discount = discount.apply_bulk_discount(original_amount)
+    print("Bulk Discount on 100:", bulk_discount)
+
+    # Calculate VAT
+    vat_amount = discount.calculate_vat(original_amount)
+    print("VAT on 100:", vat_amount)
+
+
+# Test cases for Order Class
+def test_order_class():
+    print("\n--- Order Class Test ---")
+    customer = Customer("Sulaiman", "suliman@information.com / 0502222222", True, "2024-01-15")
     cart = ShoppingCart()
-    cart.add_to_cart(book1, 1)  # 1 copy of Python Basics
-    cart.add_to_cart(book2, 1)  # 1 copy of Advanced Python
-    cart.add_to_cart(book3, 1)  # 1 copy of Data Science Essentials
-    cart.add_to_cart(book4, 1)  # 1 copy of Machine Learning Intro
-    cart.add_to_cart(book5, 1)  # 1 copy of Deep Learning Techniques
+    book1 = EBook("Python Basics", "John Smith", "2023-01-10", "Programming", 20.0)
+    book2 = EBook("Advanced Python", "Jane Doe", "2023-02-20", "Programming", 25.0)
+    cart.add_to_cart(book1, 1)
+    cart.add_to_cart(book2, 1)
+    discount = Discount()
 
-    # Display the ShoppingCart contents
-    print("Cart Contents:", cart)
+    # Create an order and apply discounts
+    order = Order(customer, cart, "2024-11-06", discount)
+    order.apply_discount()
+    print("Order Details:", order)
 
-    # Step 4: Create a Discount object with default rates
-    discount = Discount()  # Default: 10% loyalty, 20% bulk, 8% VAT
+    # Calculate total after discounts and VAT
+    print("Order Total with VAT:", order.calculate_total())
 
-    # Step 5: Create an Order using the Customer, ShoppingCart, and Discount
-    order = Order(
-        customer=customer,
-        shopping_cart=cart,
-        order_date="2024-11-06",
-        discount=discount
-    )
-    order.apply_discount()  # Apply discounts based on loyalty and bulk conditions
 
-    # Display the Order details
-    print(order)
+# Test cases for Invoice Class
+def test_invoice_class():
+    print("\n--- Invoice Class Test ---")
+    customer = Customer("Sulaiman", "suliman@information.com / 0502222222", True, "2024-01-15")
+    cart = ShoppingCart()
+    book1 = EBook("Python Basics", "John Smith", "2023-01-10", "Programming", 20.0)
+    cart.add_to_cart(book1, 1)
+    discount = Discount()
+    order = Order(customer, cart, "2024-11-06", discount)
+    order.apply_discount()
 
-    # Step 6: Generate an Invoice for the Order
+    # Generate an invoice
     invoice = Invoice(order)
-    invoice.set_invoice_date("2024-11-06")  # Set invoice date
-
-    # Print the full invoice details
+    invoice.set_invoice_date("2024-11-06")
     print(invoice.generate_invoice())
 
-# Run the test case
-run_test_case()
+
+# Run all test cases
+def run_all_tests():
+    test_customer_class()
+    test_ebook_class()
+    test_shopping_cart_class()
+    test_discount_class()
+    test_order_class()
+    test_invoice_class()
+
+
+# Execute the tests
+run_all_tests()
